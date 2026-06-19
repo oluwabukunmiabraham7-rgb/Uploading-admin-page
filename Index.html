@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enitan Admin - Full Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --orange: #f68b1e; --green: #2ecc71; --grey: #f4f7f6; --red: #ff4757; --blue: #3498db; --yellow: #f1c40f; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--grey); padding-bottom: 30px; }
+
+        .admin-nav { background: white; display: flex; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000; }
+        .nav-tab { flex: 1; padding: 18px; text-align: center; font-weight: bold; color: #888; border-bottom: 4px solid transparent; cursor: pointer; font-size: 14px; }
+        .nav-tab.active { color: var(--orange); border-bottom-color: var(--orange); }
+
+        .section { display: none; padding: 20px; max-width: 500px; margin: 0 auto; }
+        .section.active { display: block; }
+
+        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        h2 { font-size: 24px; margin-top: 0; margin-bottom: 25px; color: #111; }
+        
+        .input-box { margin-bottom: 15px; }
+        .label-text { display: block; font-size: 12px; font-weight: bold; color: #666; margin-bottom: 5px; }
+        input, select, textarea { 
+            width: 100%; padding: 15px; border: 1.5px solid #eee; border-radius: 12px; 
+            background: #fff; box-sizing: border-box; font-size: 15px; outline: none;
+        }
+
+        .btn-post { 
+            width: 100%; background: var(--orange); color: white; border: none; 
+            padding: 16px; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; 
+            text-transform: uppercase; margin-top: 10px;
+        }
+
+        .order-card { 
+            background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-left: 8px solid var(--orange); 
+        }
+        .order-id-tag { background: #333; color: white; padding: 6px 12px; border-radius: 8px; font-weight: bold; font-size: 14px; }
+        .order-total { color: var(--green); font-weight: 800; font-size: 20px; float: right; }
+        .customer-line { margin: 15px 0; font-size: 16px; color: #333; font-weight: 600; }
+        
+        .product-item { display: flex; align-items: center; gap: 12px; background: #fff; padding: 10px; border-radius: 12px; margin-top: 10px; border: 1px solid #eee; }
+        .product-item img { width: 45px; height: 45px; border-radius: 8px; object-fit: cover; }
+
+        /* Modal for Editing */
+        #editModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; align-items: center; justify-content: center; }
+        #editModal.active { display: flex; }
+
+        .payment-info-small { font-size: 13px; color: #555; background: #f9f9f9; padding: 10px; border-radius: 10px; margin: 10px 0; }
+
+        /* Reviews Styling */
+        .review-card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border-left: 5px solid var(--blue); }
+        .review-product { font-size: 12px; color: #777; text-transform: uppercase; font-weight: bold; }
+        .review-stars { color: var(--yellow); margin: 5px 0; }
+        .review-text { font-size: 15px; color: #333; margin-bottom: 8px; font-style: italic; }
+        .review-author { font-size: 13px; color: #555; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<div class="admin-nav">
+    <div class="nav-tab active" id="tab-inventory">Inventory</div>
+    <div class="nav-tab" id="tab-orders">Order Roll</div>
+    <div class="nav-tab" id="tab-reviews">Customer Reviews</div>
+</div>
+
+<div id="inventory" class="section active">
+    <div class="card">
+        <h2>Upload Item</h2>
+        <div class="input-box"><input type="text" id="pName" placeholder="Product Name"></div>
+        <!-- Changed type from number to text to allow commas -->
+        <div class="input-box"><input type="text" id="pPrice" placeholder="Price (₦) e.g. 15,000"></div>
+        <div class="input-box"><input type="text" id="pImg" placeholder="Image URL"></div>
+        <div class="input-box"><input type="text" id="pSizes" placeholder="Available Sizes (e.g. M, L, XL or 42, 43)"></div>
+        <div class="input-box"><input type="text" id="pColors" placeholder="Available Colors (e.g. Red, Blue, Black)"></div>
+        <div class="input-box">
+            <select id="pCat">
+                <option selected disabled>Select Category</option>
+                <optgroup label="CAPS & HATS">
+                    <option>Men's Designer Caps</option>
+                    <option>Women's Fashion Caps</option>
+                    <option>Unisex Face-Caps</option>
+                </optgroup>
+                <optgroup label="MEN'S CLOTHING">
+                    <option>Men top</option>
+                    <option>Men Trouser</option>
+                    <option>Men complete dresses</option>
+                    <option>Boxers</option>
+                    <option>Singlet</option>
+                </optgroup>
+                <optgroup label="WOMEN'S CLOTHING">
+                    <option>Women Tops</option>
+                    <option>Women paint</option>
+                    <option>Bra</option>
+                    <option>Women Trouser</option>
+                </optgroup>
+                <optgroup label="FOOTWEAR">
+                    <option>Sneakers & Canvas</option>
+                    <option>Sliders & Slippers</option>
+                    <option>Women sneakers</option>
+                </optgroup>
+                <optgroup label="LIFESTYLE & KITCHEN">
+                    <option>Smart</option>
+                    <option>Water bottle</option>
+                    <option>Flask</option>
+                    <option>Cosmetics</option>
+                </optgroup>
+                <optgroup label="ACCESSORIES">
+                    <option>Wristwatches</option>
+                    <option>Neck Chains</option>
+                    <option>Unisex Belts</option>
+                    <option>Perfumes</option>
+                </optgroup>
+            </select>
+        </div>
+        <button class="btn-post" id="postBtn">POST TO SHOP</button>
+    </div>
+
+    <div class="card">
+        <div style="font-weight: bold; font-size: 20px; margin-bottom: 10px;">Manage Items</div>
+        <div id="manageItemsList"></div>
+    </div>
+</div>
+
+<div id="editModal">
+    <div class="card" style="width: 90%; max-width: 400px;">
+        <h3>Edit Product</h3>
+        <input type="hidden" id="editId">
+        <div class="input-box">
+            <span class="label-text">Product Name</span>
+            <input type="text" id="editName">
+        </div>
+        <div class="input-box">
+            <span class="label-text">Price (₦)</span>
+            <!-- Changed type from number to text to allow commas -->
+            <input type="text" id="editPrice">
+        </div>
+        <div class="input-box">
+            <span class="label-text">Sizes</span>
+            <input type="text" id="editSizes">
+        </div>
+        <div class="input-box">
+            <span class="label-text">Colors</span>
+            <input type="text" id="editColors">
+        </div>
+        <button class="btn-post" id="updateBtn" style="background: var(--blue);">SAVE CHANGES</button>
+        <button class="btn-post" onclick="document.getElementById('editModal').classList.remove('active')" style="background: #ccc; margin-top: 5px;">CANCEL</button>
+    </div>
+</div>
+
+<div id="orders" class="section">
+    <div id="orderList"></div>
+</div>
+
+<div id="reviews" class="section">
+    <div class="card">
+        <div style="font-weight: bold; font-size: 20px; margin-bottom: 15px;">Product Reviews</div>
+        <div id="reviewList"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = { 
+        apiKey: "AIzaSyC1w8tUDW6XTfkPceprjj1kJed9CM5r6YA", 
+        authDomain: "enitan-collection-7e541.firebaseapp.com", 
+        projectId: "enitan-collection-7e541" 
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const tabInv = document.getElementById('tab-inventory');
+    const tabOrd = document.getElementById('tab-orders');
+    const tabRev = document.getElementById('tab-reviews');
+    const secInv = document.getElementById('inventory');
+    const secOrd = document.getElementById('orders');
+    const secRev = document.getElementById('reviews');
+
+    tabInv.addEventListener('click', () => {
+        tabInv.classList.add('active'); tabOrd.classList.remove('active'); tabRev.classList.remove('active');
+        secInv.classList.add('active'); secOrd.classList.remove('active'); secRev.classList.remove('active');
+    });
+
+    tabOrd.addEventListener('click', () => {
+        tabOrd.classList.add('active'); tabInv.classList.remove('active'); tabRev.classList.remove('active');
+        secOrd.classList.add('active'); secInv.classList.remove('active'); secRev.classList.remove('active');
+    });
+
+    tabRev.addEventListener('click', () => {
+        tabRev.classList.add('active'); tabInv.classList.remove('active'); tabOrd.classList.remove('active');
+        secRev.classList.add('active'); secInv.classList.remove('active'); secOrd.classList.remove('active');
+    });
+
+    document.getElementById('postBtn').addEventListener('click', async () => {
+        const name = document.getElementById('pName').value;
+        const rawPrice = document.getElementById('pPrice').value;
+        const img = document.getElementById('pImg').value;
+        const cat = document.getElementById('pCat').value;
+        const sizes = document.getElementById('pSizes').value;
+        const colors = document.getElementById('pColors').value;
+        
+        if(!name || !rawPrice || !img || !cat) return alert("Fill all fields!");
+
+        // Strips away any commas typed by the admin, converting it to a clean number for Firebase
+        const cleanPrice = Number(rawPrice.replace(/,/g, ''));
+
+        if(isNaN(cleanPrice)) return alert("Please enter a valid price amount!");
+
+        await addDoc(collection(db, "products"), { 
+            name, 
+            price: cleanPrice, 
+            image: img, 
+            category: cat, 
+            sizes: sizes || "N/A", 
+            colors: colors || "N/A", 
+            timestamp: serverTimestamp() 
+        });
+        alert("Live!");
+        document.querySelectorAll('#inventory input').forEach(i => i.value = "");
+    });
+
+    onSnapshot(query(collection(db, "products"), orderBy("timestamp", "desc")), (snap) => {
+        document.getElementById('manageItemsList').innerHTML = snap.docs.map(doc => {
+            const item = doc.data();
+            return `
+                <div class="product-item">
+                    <img src="${item.image}">
+                    <div style="flex:1">
+                        <b>${item.name}</b><br>
+                        <small>₦${Number(item.price).toLocaleString()}</small><br>
+                        <small style="color:#777">Size: ${item.sizes || 'N/A'} | Color: ${item.colors || 'N/A'}</small>
+                    </div>
+                    <button class="edit-trigger" data-id="${doc.id}" data-name="${item.name}" data-price="${item.price}" data-sizes="${item.sizes || ''}" data-colors="${item.colors || ''}" style="background:var(--blue); color:white; border:none; padding:8px; border-radius:8px; cursor:pointer;"><i class="fas fa-edit"></i></button>
+                    <button class="delete-trigger" data-id="${doc.id}" style="background:var(--red); color:white; border:none; padding:8px; border-radius:8px; margin-left:5px; cursor:pointer;"><i class="fas fa-trash"></i></button>
+                </div>`;
+        }).join('');
+
+        document.querySelectorAll('.delete-trigger').forEach(btn => {
+            btn.onclick = async () => { if(confirm("Delete this item?")) await deleteDoc(doc(db, "products", btn.dataset.id)); };
+        });
+
+        document.querySelectorAll('.edit-trigger').forEach(btn => {
+            btn.onclick = () => {
+                document.getElementById('editId').value = btn.dataset.id;
+                document.getElementById('editName').value = btn.dataset.name;
+                
+                // Show the price inside the edit input box with commas formatted cleanly
+                const formattedPrice = Number(btn.dataset.price).toLocaleString();
+                document.getElementById('editPrice').value = formattedPrice;
+                
+                document.getElementById('editSizes').value = btn.dataset.sizes;
+                document.getElementById('editColors').value = btn.dataset.colors;
+                document.getElementById('editModal').classList.add('active');
+            };
+        });
+    });
+
+    document.getElementById('updateBtn').onclick = async () => {
+        const id = document.getElementById('editId').value;
+        const name = document.getElementById('editName').value;
+        const rawPrice = document.getElementById('editPrice').value;
+        const sizes = document.getElementById('editSizes').value;
+        const colors = document.getElementById('editColors').value;
+        
+        // Strip out commas again before updating database
+        const cleanPrice = Number(rawPrice.replace(/,/g, ''));
+        if(isNaN(cleanPrice)) return alert("Please enter a valid price amount!");
+
+        await updateDoc(doc(db, "products", id), { 
+            name: name, 
+            price: cleanPrice,
+            sizes: sizes,
+            colors: colors
+        });
+        alert("Product updated!");
+        document.getElementById('editModal').classList.remove('active');
+    };
+
+    onSnapshot(query(collection(db, "orders"), orderBy("timestamp", "desc")), (snap) => {
+        document.getElementById('orderList').innerHTML = snap.docs.map(oDoc => {
+            const o = oDoc.data();
+            return `
+                <div class="order-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <span class="order-id-tag">${o.orderId}</span>
+                            <button class="delete-order-btn" data-id="${oDoc.id}" style="background:var(--red); color:white; border:none; padding:6px 10px; border-radius:8px; margin-left:10px; cursor:pointer;"><i class="fas fa-trash"></i></button>
+                        </div>
+                        <span class="order-total">₦${Number(o.total).toLocaleString()}</span>
+                    </div>
+                    <div class="customer-line">Customer: ${o.customerName} (${o.phone})</div>
+                    
+                    <div class="payment-info-small">
+                        <b>Payment Method:</b> ${o.paymentMethod || 'Not set'}<br>
+                        <b>Sender Name/ID:</b> ${o.transactionRef || 'N/A'}
+                    </div>
+
+                    <div class="input-box">
+                        <span class="label-text">Delivery Address</span>
+                        <input type="text" value="${o.address}" readonly>
+                    </div>
+                    <div class="input-box">
+                        <span class="label-text">Set Delivery Date</span>
+                        <input type="date" class="date-input" data-id="${oDoc.id}" value="${o.deliveryDate || ''}">
+                    </div>
+                    <div class="input-box">
+                        <span class="label-text">Order Status</span>
+                        <select class="status-select" data-id="${oDoc.id}">
+                            <option ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                            <option ${o.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                            <option ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                        </select>
+                    </div>
+                    <button class="save-trigger" data-id="${oDoc.id}" style="background:var(--green); color:white; border:none; padding:15px; width:100%; border-radius:12px; font-weight:bold; margin-top:10px; cursor:pointer;">SAVE UPDATES</button>
+                </div>`;
+        }).join('');
+
+        document.querySelectorAll('.delete-order-btn').forEach(btn => {
+            btn.onclick = async () => {
+                if(confirm("Permanently delete this order from records?")) {
+                    await deleteDoc(doc(db, "orders", btn.dataset.id));
+                    alert("Order Deleted");
+                }
+            };
+        });
+
+        document.querySelectorAll('.save-trigger').forEach(btn => {
+            btn.onclick = async () => {
+                const id = btn.dataset.id;
+                const status = document.querySelector(`.status-select[data-id="${id}"]`).value;
+                const date = document.querySelector(`.date-input[data-id="${id}"]`).value;
+                await updateDoc(doc(db, "orders", id), { status: status, deliveryDate: date });
+                alert("Order updated!");
+            };
+        });
+    });
+
+    onSnapshot(query(collection(db, "reviews"), orderBy("timestamp", "desc")), (snap) => {
+        if(snap.empty) {
+            document.getElementById('reviewList').innerHTML = `<p style="color:#888; text-align:center;">No reviews submitted yet.</p>`;
+            return;
+        }
+        document.getElementById('reviewList').innerHTML = snap.docs.map(rDoc => {
+            const r = rDoc.data();
+            let starsStr = '';
+            for(let i=0; i<5; i++) {
+                starsStr += i < r.rating ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
+            }
+            return `
+                <div class="review-card">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <span class="review-product"><i class="fas fa-shopping-bag"></i> ${r.productName}</span>
+                        <button class="delete-review-btn" data-id="${rDoc.id}" style="background:transparent; color:var(--red); border:none; cursor:pointer; font-size:16px;"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                    <div class="review-stars">${starsStr}</div>
+                    <div class="review-text">"${r.comment}"</div>
+                    <div class="review-author">— By ${r.customerName}</div>
+                </div>`;
+        }).join('');
+
+        document.querySelectorAll('.delete-review-btn').forEach(btn => {
+            btn.onclick = async () => {
+                if(confirm("Delete this review from your store?")) {
+                    await deleteDoc(doc(db, "reviews", btn.dataset.id));
+                    alert("Review removed!");
+                }
+            };
+        });
+    });
+</script>
+</body>
+</html>
